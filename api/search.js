@@ -7,17 +7,24 @@ export default async function handler(req, res) {
         return
     }
 
+    const key = process.env.STDICT_KEY
+
     const url =
         'https://stdict.korean.go.kr/api/search.do?key=' +
-        process.env.STDICT_KEY +
+        key +
         '&q=' +
         encodeURIComponent(q) +
         '&req_type=json&num=5'
 
     try {
         const r = await fetch(url)
-        const data = await r.json()
-        res.status(200).json(data)
+        const text = await r.text()
+        res.status(200).json({
+            keyLength: key ? key.length : 0,
+            keyPreview: key ? key.slice(0, 4) + '...' : 'EMPTY',
+            debugUrl: url,
+            rawResponse: text,
+        })
     } catch (e) {
         res.status(500).json({ error: 'proxy failed', message: String(e) })
     }
